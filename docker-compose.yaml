@@ -5,18 +5,24 @@ services:
     build:
       dockerfile: php.Dockerfile
       context: .
+      args:
+        - UID=${UID:-1000}
+        - GID=${GID:-1000}
     restart: always
     volumes:
       - "./src/:/var/www/html/"
       - "./apache/000-default.conf:/etc/apache2/sites-available/000-default.conf"
       - ./ini/upload.ini:/usr/local/etc/php/conf.d/uploads.ini
       - ./ini/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
-    command: >
-      bash -c "
-      mkdir -p /var/www/html/logs && chown -R 1000:www-data /var/www/html/logs && chmod -R 775 /var/www/html/logs &&
-      mkdir -p /var/www/html/public/uploads && chown -R 1000:www-data /var/www/html/public/uploads && chmod -R 775 /var/www/html/public/uploads &&
-      apache2-foreground
-      "
+    # command: >
+    #   bash -c "
+    #   mkdir -p /var/www/html/logs &&
+    #   chown -R 1000:www-data /var/www/html/logs &&
+    #   chmod -R 775 /var/www/html/logs &&
+    #   chown -R 1000:www-data /var/www/html/public/ &&
+    #   chmod -R 775 /var/www/html/public/ &&
+    #   apache2-foreground
+    #   "
     ports:
       - "80:80"
 

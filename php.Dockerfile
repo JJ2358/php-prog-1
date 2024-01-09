@@ -12,5 +12,17 @@ RUN apt-get update && apt-get install -y libicu-dev git zip libpng-dev libmagick
     && docker-php-ext-configure intl \
     && a2enmod rewrite
 
+ARG UID
+ARG GID
+
+ENV UID=${UID}
+ENV GID=${GID}
+
+RUN groupadd -g ${GID} php && \
+    useradd -g php -u ${UID} -s /bin/sh -m php
+
+RUN sed -i 's/export APACHE_RUN_USER=www-data/export APACHE_RUN_USER=php/g' /etc/apache2/envvars
+RUN sed -i 's/export APACHE_RUN_GROUP=www-data/export APACHE_RUN_GROUP=php/g' /etc/apache2/envvars
+
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
