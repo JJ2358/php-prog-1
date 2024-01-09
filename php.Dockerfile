@@ -24,5 +24,7 @@ RUN groupadd -g ${GID} php && \
 RUN sed -i 's/export APACHE_RUN_USER=www-data/export APACHE_RUN_USER=php/g' /etc/apache2/envvars
 RUN sed -i 's/export APACHE_RUN_GROUP=www-data/export APACHE_RUN_GROUP=php/g' /etc/apache2/envvars
 
+USER php
+
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
