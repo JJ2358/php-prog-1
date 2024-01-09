@@ -1,0 +1,10 @@
+php_flag log_errors on
+php_value error_log /var/www/html/logs/php_errors.log
+
+# dev
+php_flag display_errors on
+php_value error_reporting -1
+
+# prod
+# php_flag display_errors off
+# php_value error_reporting -1
