@@ -5,12 +5,11 @@ COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
 COPY --from=node /usr/local/bin/node /usr/local/bin/node
 RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm
 
-RUN apt-get update && apt-get install -y libicu-dev git zip \
-    && pecl install xdebug \
-    && docker-php-ext-install pdo pdo_mysql mysqli \
-	&& docker-php-ext-enable xdebug \
+RUN apt-get update && apt-get install -y libicu-dev git zip libpng-dev libmagickwand-dev --no-install-recommends \
+    && pecl install xdebug imagick \
+    && docker-php-ext-install pdo pdo_mysql mysqli intl gd \
+	  && docker-php-ext-enable xdebug imagick \
     && docker-php-ext-configure intl \
-    && docker-php-ext-install intl \
     && a2enmod rewrite
 
 # Install Composer
