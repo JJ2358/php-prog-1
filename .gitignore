@@ -1,3 +1,4 @@
 /src/node_modules
 /src/vendor/
 /src/logs/php_errors.log
+/src/public/uploads/
