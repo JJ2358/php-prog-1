@@ -4,7 +4,8 @@
 $root = dirname(__DIR__) . DIRECTORY_SEPARATOR;
 
 define('VIEWS_PATH', $root . 'views' . DIRECTORY_SEPARATOR);
-define('UPLOADS_DIR', $root . 'public' . DIRECTORY_SEPARATOR . 'uploads');
+define('UPLOADS_DIR', 'uploads');
+define('UPLOADS_PATH', $root . 'public' . DIRECTORY_SEPARATOR . UPLOADS_DIR);
 
 //database constants
 define('DB_HOST', 'mysql-server');
