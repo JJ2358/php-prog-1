@@ -17,7 +17,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `sean_dotnetcoreSamples`
+-- Database: `customers`
 --
 
 -- --------------------------------------------------------
@@ -34,7 +34,8 @@ CREATE TABLE `tblCustomer` (
   `city` varchar(100) DEFAULT NULL,
   `province` varchar(50) DEFAULT NULL,
   `postal` varchar(7) DEFAULT NULL,
-  `phone` varchar(20) NOT NULL
+  `phone` varchar(20) NOT NULL,
+  `photo` varchar(105) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4;
 
 --
