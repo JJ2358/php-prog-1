@@ -80,7 +80,7 @@ function getCustomersPDO(): array
     return $customers;
 }
 
-function getCustomerPDO(int $id): array
+function getCustomerPDO(int $id): array|bool
 {
     //get connection
     $db = getConnectionPDO();
