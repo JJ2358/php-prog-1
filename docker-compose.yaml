@@ -2,6 +2,7 @@ version: "3.7"
 services:
   web-server:
     container_name: ws
+    privileged: true
     build:
       dockerfile: php.Dockerfile
       context: .
