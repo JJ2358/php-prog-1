@@ -97,73 +97,38 @@ function getCustomerPDO(int $id): array|bool
     return $result;
 }
 
-// *********************CHALLENGE SOLUTION*******************************
-function checkIfCustomerExists(array $data): bool
-{
-    // array destructuring
-    [
-        'lastName' => $lastName,
-        'firstName' => $firstName,
-        'phone' => $phone
-    ] = $data;
-
-    //get connection
-    $db = getConnectionPDO();
-
-    //create query
-    $stmt = $db->prepare('SELECT * FROM tblCustomer WHERE lastName=? AND firstName=? AND phone=?');
-
-    //execute query
-    $stmt->execute([$lastName, $firstName, $phone]);
-
-    //get results
-    $result = $stmt->rowCount();
-
-    return $result >= 1 ? true : false;
-}
-
 function insertCustomerPDO(array $data): bool
 {
-    // array destructuring
-    [
-        'lastName' => $lastName,
-        'firstName' => $firstName,
-        'address' => $address,
-        'city' => $city,
-        'province' => $province,
-        'postal' => $postal,
-        'phone' => $phone
-    ] = $data;
-
     //get connection
     $db = getConnectionPDO();
 
     // method one
     // $stmt = $db->prepare("
-    //     INSERT INTO tblCustomer ('lastName', 'firstName', 'address', 'city', 'province', 'postal', 'phone')
-    //     VALUES (:lastName, :firstName, :address, :city, :province, :postal, :phone)");
+    // INSERT INTO tblCustomer (lastName, firstName, address, city, province, postal, phone)
+    // VALUES (?, ?, ?, ?, ?, ?, ?)");
+
+    // return $stmt->execute($data);
 
     // method two
     $stmt = $db->prepare("
-        INSERT INTO tblCustomer (lastName, firstName, address, city, province, postal, phone)
-        VALUES (?, ?, ?, ?, ?, ?, ?)");
+    INSERT INTO tblCustomer (lastName, firstName, address, city, province, postal, phone)
+    VALUES (:lastName, :firstName, :address, :city, :province, :postal, :phone)");
 
-    return $stmt->execute([$lastName, $firstName, $address, $city, $province, $postal, $phone]);
+    // return $stmt->execute($data);
+
+    $stmt->bindValue(':lastName', $data['lastName']);
+    $stmt->bindValue(':firstName', $data['firstName']);
+    $stmt->bindValue(':address', $data['address']);
+    $stmt->bindValue(':city', $data['city']);
+    $stmt->bindValue(':province', $data['province']);
+    $stmt->bindValue(':postal', $data['postal']);
+    $stmt->bindValue(':phone', $data['phone']);
+
+    return $stmt->execute();
 }
 
 function updateCustomerPDO(int $id, array $data): bool
 {
-    // array destructuring
-    [
-        'lastName' => $lastName,
-        'firstName' => $firstName,
-        'address' => $address,
-        'city' => $city,
-        'province' => $province,
-        'postal' => $postal,
-        'phone' => $phone
-    ] = $data;
-
     //get connection
     $db = getConnectionPDO();
 
@@ -172,7 +137,7 @@ function updateCustomerPDO(int $id, array $data): bool
         SET lastName=?, firstName=?, address=?, city=?, province=?, postal=?, phone=?
         WHERE customerId=?");
 
-    return $stmt->execute([$lastName, $firstName, $address, $city, $province, $postal, $phone, $id]);
+    return $stmt->execute([$data['lastName'], $data['firstName'], $data['address'], $data['city'], $data['province'], $data['postal'], $data['phone'], $id]);
 }
 
 function deleteCustomerPDO(int $id): bool
@@ -185,14 +150,6 @@ function deleteCustomerPDO(int $id): bool
     $_SESSION['message'] = "Customer <i>$id</i> deleted successfully";
 
     return $stmt->execute([$id]);
-}
-
-function checkInput($input): string
-{
-    $input = trim($input);
-    $input = stripslashes($input);
-    $input = htmlspecialchars($input);
-    return $input;
 }
 
 function getSessionMessage(): bool|string
