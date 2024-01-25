@@ -69,16 +69,11 @@ if (isset($_POST['submit'])) {
             header('Location: edit.php?' . http_build_query(['id' => $customerID]));
             exit;
         } else {
-            // ******** challenge solution ********
-            if (checkIfCustomerExists($_POST)) {
-                $formErrors['error'] = 'Customer already exists';
-            } else {
-                insertCustomerPDO($_POST);
-                $formSuccess = true;
-                $_SESSION['message'] = 'New Customer added';
-                header('Location: add.php');
-                exit;
-            }
+            insertCustomerPDO($_POST);
+            $formSuccess = true;
+            $_SESSION['message'] = 'New Customer added';
+            header('Location: add.php');
+            exit;
         }
     }
 }
