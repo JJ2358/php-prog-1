@@ -108,10 +108,6 @@ if ($customerID) {
                 <span class="text-green-500"><?= getSessionMessage(); ?></span>
             <?php endif; ?>
 
-            <?php if (isset($formErrors['error'])) : ?>
-                <span class="text-red-500"><?= $formErrors['error']; ?></span>
-            <?php endif; ?>
-
             <form method="POST" action="<?= $formAction; ?>">
                 <div class="mb-3">
                     <label class="block text-gray-700 font-bold mb-2" for="lastName">Last Name</label>
