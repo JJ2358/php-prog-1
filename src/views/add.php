@@ -13,6 +13,7 @@ $formErrors = [
     'province' => '',
     'postal' => '',
     'phone' => '',
+    'photo' => '',
 ];
 $formInputs = $formErrors;
 $formSuccess = false;
@@ -59,6 +60,50 @@ if (isset($_POST['submit'])) {
         // $ - end of string
     } else if (!preg_match("/^[A-Za-z]\d[A-Za-z][ ]?\d[A-Za-z]\d$/", $formInputs['postal'])) {
         $formErrors['postal'] = 'Postal must be in format A1A 1A1 or A1A1A1';
+    }
+
+    // check if photo was uploaded - UPLOAD_ERR_OK is a constant that equals 0 - means no errors
+    if ($_FILES['photo']['error'] == UPLOAD_ERR_OK) {
+        $maxFileSize = 1024 * (1024 * 2); //2MB
+
+        //our allowed file extensions
+        $allowedFileExtension = [
+            'jpg', 'jpeg', 'png',
+        ];
+
+        // get file name - only first 100 characters
+        $fileName = substr($_FILES['photo']['name'], 0, 100);
+
+        // get target path with file name - basename() gets the file name
+        $target = UPLOADS_DIR . DIRECTORY_SEPARATOR . basename($fileName);
+        // get file extension
+        $extension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+
+        //check size
+        if ($_FILES['photo']['size'] >= $maxFileSize) {
+            $formErrors['photo'] = 'Uploaded file exceeds maximum file size of ' . $maxFileSize / 1024 / 1024 . 'MB';
+        }
+
+        //check file type
+        if (!in_array($extension, $allowedFileExtension)) {
+            $formErrors['photo'] = 'Incorrect file type. Please upload a ' . implode(', ', $allowedFileExtension);
+        }
+
+        // no errors, attempt to upload
+        if (!$formErrors['photo']) {
+            // upload image to server
+
+            // make uploads directory if it doesn't exist
+            if (!is_dir(UPLOADS_DIR)) {
+                mkdir(UPLOADS_DIR);
+            }
+
+            if (!move_uploaded_file($_FILES['photo']['tmp_name'], $target)) {
+                $formErrors['photo'] = 'Sorry, there was a problem uploading your file. Please try again.';
+            }
+
+            $_POST['photo'] = $fileName;
+        }
     }
 
     if (implode('', $formErrors) === '') {
@@ -108,7 +153,7 @@ if ($customerID) {
                 <span class="text-green-500"><?= getSessionMessage(); ?></span>
             <?php endif; ?>
 
-            <form method="POST" action="<?= $formAction; ?>">
+            <form method="POST" action="<?= $formAction; ?>" enctype="multipart/form-data">
                 <div class="mb-3">
                     <label class="block text-gray-700 font-bold mb-2" for="lastName">Last Name</label>
                     <input type="text" id="lastName" name="lastName" value="<?= htmlspecialchars($formInputs['lastName']); ?>" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
@@ -145,6 +190,16 @@ if ($customerID) {
                 <div class="mb-3">
                     <label class="block text-gray-700 font-bold mb-2" for="phone">Phone</label>
                     <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" id="phone" name="phone" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="block text-gray-700 font-bold mb-2" for="photo">Photo</label>
+                    <input type="file" name="photo" />
+                    <span class="text-red-500"><?= $formErrors['photo']; ?></span>
+
+                    <?php if (isset($formInputs['photo'])) : ?>
+                        <img src="<?= UPLOADS_DIR . DIRECTORY_SEPARATOR . $formInputs['photo']; ?>" alt="<?= $formInputs['photo']; ?>" width="150" />
+                    <?php endif; ?>
                 </div>
 
                 <div class="mt-5">

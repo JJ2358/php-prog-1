@@ -55,9 +55,11 @@
         </table>
     </div>
 
+    <script src=" ./assets/dist/main.bundle.js">
+    </script>
+
 </body>
 
-<script src=" ./assets/dist/main.bundle.js">
-</script>
+
 
 </html>

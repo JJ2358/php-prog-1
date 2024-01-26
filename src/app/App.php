@@ -111,10 +111,8 @@ function insertCustomerPDO(array $data): bool
 
     // method two
     $stmt = $db->prepare("
-    INSERT INTO tblCustomer (lastName, firstName, address, city, province, postal, phone)
-    VALUES (:lastName, :firstName, :address, :city, :province, :postal, :phone)");
-
-    // return $stmt->execute($data);
+    INSERT INTO tblCustomer (lastName, firstName, address, city, province, postal, phone, photo)
+    VALUES (:lastName, :firstName, :address, :city, :province, :postal, :phone, :photo)");
 
     $stmt->bindValue(':lastName', $data['lastName']);
     $stmt->bindValue(':firstName', $data['firstName']);
@@ -123,21 +121,38 @@ function insertCustomerPDO(array $data): bool
     $stmt->bindValue(':province', $data['province']);
     $stmt->bindValue(':postal', $data['postal']);
     $stmt->bindValue(':phone', $data['phone']);
+    $stmt->bindValue(':photo', $data['photo']);
 
     return $stmt->execute();
 }
 
 function updateCustomerPDO(int $id, array $data): bool
 {
+    // unset submit button
+    unset($data['submit']);
+
     //get connection
     $db = getConnectionPDO();
 
+    // add customer id to data array
+    $data['customerId'] = $id;
+
+    //construct set string
+    $set = "SET lastName=:lastName, firstName=:firstName, address=:address, city=:city, province=:province, postal=:postal, phone=:phone";
+
+    // if photo provided, add to set string
+    if (!empty($data['photo'])) {
+        $set .= ', photo=:photo';
+    }
+
     $stmt = $db->prepare("
         UPDATE tblCustomer
-        SET lastName=?, firstName=?, address=?, city=?, province=?, postal=?, phone=?
-        WHERE customerId=?");
+        $set
+        WHERE customerId=:customerId");
 
-    return $stmt->execute([$data['lastName'], $data['firstName'], $data['address'], $data['city'], $data['province'], $data['postal'], $data['phone'], $id]);
+    return $stmt->execute($data);
+
+    // return $stmt->execute([$data['lastName'], $data['firstName'], $data['address'], $data['city'], $data['province'], $data['postal'], $data['phone'], $data['photo'], $id]);
 }
 
 function deleteCustomerPDO(int $id): bool
