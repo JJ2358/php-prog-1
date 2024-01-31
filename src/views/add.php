@@ -198,7 +198,7 @@ if ($customerID) {
                     <span class="text-red-500"><?= $formErrors['photo']; ?></span>
 
                     <?php if (isset($formInputs['photo'])) : ?>
-                        <img src="<?= UPLOADS_DIR . DIRECTORY_SEPARATOR . $formInputs['photo']; ?>" alt="<?= $formInputs['photo']; ?>" width="150" />
+                        <img src="<?= resizeImage($formInputs['photo'], 150, 150); ?>" alt="<?= $formInputs['photo']; ?>" width="150" />
                     <?php endif; ?>
                 </div>
 

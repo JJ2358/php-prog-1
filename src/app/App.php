@@ -178,3 +178,30 @@ function getSessionMessage(): bool|string
 
     return $message;
 }
+
+function resizeImage(string $file, int $width, int $height): string
+{
+    // returns an array containing information about the path
+    $pathParts = pathinfo($file);
+
+    //get extension
+    $extension = $pathParts['extension'];
+
+    //create new filename
+    $fileName = $pathParts['filename'] . '-' . $width . 'x' . $height . '.' . $extension;
+
+    //if file already exists, return path
+    if (file_exists(UPLOADS_PATH . DIRECTORY_SEPARATOR . $fileName)) {
+        return UPLOADS_DIR . DIRECTORY_SEPARATOR . $fileName;
+    }
+
+    // create new Imagick object
+    $img = new \Imagick(UPLOADS_PATH . DIRECTORY_SEPARATOR . $file);
+
+    // resize image see https://www.php.net/manual/en/imagick.resizeimage.php
+    $img->resizeImage($width, $height, \Imagick::FILTER_LANCZOS, 1, true);
+
+    $img->writeImage(UPLOADS_DIR . DIRECTORY_SEPARATOR . $fileName);
+
+    return UPLOADS_DIR . DIRECTORY_SEPARATOR . $fileName;
+}
