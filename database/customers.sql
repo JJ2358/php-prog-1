@@ -25,16 +25,26 @@ SET time_zone = "+00:00";
 --
 -- Table structure for table `tblCustomer`
 --
+-- init_db.sql
 
-CREATE TABLE products (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    description TEXT,
-    price DECIMAL(10, 2) NOT NULL,
-    photo VARCHAR(255),
-    status ENUM('new', 'used') NOT NULL,
-    on_sale BOOLEAN DEFAULT FALSE
+USE customers;
+
+CREATE TABLE IF NOT EXISTS products (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  price DECIMAL(10, 2) NOT NULL,
+  photo VARCHAR(255),
+  status VARCHAR(50),
+  on_sale BOOLEAN DEFAULT FALSE
 );
+
+INSERT INTO products (title, description, price, photo, status, on_sale) VALUES
+('Product 1', 'Description for product 1', 19.99, 'path/to/photo1.jpg', 'new', FALSE),
+('Product 2', 'Description for product 2', 29.99, 'path/to/photo2.jpg', 'used', TRUE),
+('Product 3', 'Description for product 3', 39.99, 'path/to/photo3.jpg', 'new', FALSE),
+('Example Product', 'This is an example product description.', 99.99, 'path/to/photo.jpg', 'new', FALSE);
+
 
 CREATE TABLE reviews (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -46,3 +56,13 @@ CREATE TABLE reviews (
     date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (product_id) REFERENCES products(id)
 );
+
+-- Insert sample reviews for product 1
+INSERT INTO reviews (product_id, rating, first_name, last_name, comment) VALUES
+(1, 5, 'John', 'Doe', 'Great product! Highly recommend.'),
+(1, 4, 'Jane', 'Smith', 'Really good, but could be better with more features.'),
+(1, 5, 'Emily', 'Jones', 'Absolutely love it! Best purchase ever.');
+
+-- Insert a sample review for product 2
+INSERT INTO reviews (product_id, rating, first_name, last_name, comment) VALUES
+(2, 3, 'Mike', 'Brown', 'It’s okay, but I had some issues with it.');

@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 session_start();
 
-// include app
+// Include app
 require dirname(__DIR__) . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'App.php';
 
-// MySQLi
-$customers = getCustomersMySQLi();
+// Retrieve filter values from GET parameters
+$status = $_GET['status'] ?? 'any'; // 'any' as default value if not specified
+$onSale = isset($_GET['on_sale']) ? 1 : 0; // Check if 'on_sale' checkbox is checked
 
-// PDO
-// $customers = getCustomersPDO();
+// Fetch filtered products based on the filters
+$products = getFilteredProducts($status, $onSale); // Use your filtering function
 
+// Pass products to the view
 require VIEWS_PATH . 'home.php';

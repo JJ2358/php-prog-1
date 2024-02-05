@@ -4,204 +4,138 @@ declare(strict_types=1);
 
 $config = require_once 'Config.php';
 
-
-// **************** MySQLi *******************************
-
-function getConnectionMySQLi(): mysqli
-{
-    //create connection
+// MySQLi Connection
+function getConnectionMySQLi(): mysqli {
     try {
-        $db = new mysqli(
-            DB_HOST,
-            DB_USER,
-            DB_PASS,
-            DB_NAME
-        );
+        $db = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+        if ($db->connect_error) {
+            die("Connection failed: " . $db->connect_error);
+        }
         return $db;
     } catch (Exception $e) {
         trigger_error($e->getMessage(), E_USER_ERROR);
     }
 }
 
-function getCustomersMySQLi(): array
-{
-    //get connection
+// Fetch Products using MySQLi
+function getProductsMySQLi(): array {
     $db = getConnectionMySQLi();
-
-    //create query
-    $stmt = $db->prepare('SELECT * FROM tblCustomer');
-    //execute query
-    $stmt->execute();
-    //get results
+    if (!$stmt = $db->prepare('SELECT * FROM products')) {
+        die("Prepare statement failed: " . $db->error);
+    }
+    if (!$stmt->execute()) {
+        die("Execute failed: " . $stmt->error);
+    }
     $result = $stmt->get_result();
 
-    $customers = [];
-
-    //loop through results and add to customers array
+    $products = [];
     while ($row = $result->fetch_assoc()) {
-        $customers[] = $row;
+        $products[] = $row;
     }
-
-    return $customers;
+    if (empty($products)) {
+        echo "No products found in database.<br>";
+    }
+    return $products;
 }
 
-// **************** PDO *******************************
 
-function getConnectionPDO(): PDO
-{
-    // construct dsn
+
+// PDO Connection
+function getConnectionPDO(): PDO {
     $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME;
-
-    // options for PDO - set default fetch mode to assoc
-    $options = [
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    ];
-
-    $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
-
-    return $pdo;
+    $options = [PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC];
+    return new PDO($dsn, DB_USER, DB_PASS, $options);
 }
 
-function getCustomersPDO(): array
-{
-    //get connection
-    $db = getConnectionPDO();
-
-    //create query
-    $stmt = $db->query('SELECT * FROM tblCustomer');
-
-    $customers = [];
-
-    //loop through results and add to customers array
+// Fetch Products using PDO
+function getProductsPDO(): array {
+    $pdo = getConnectionPDO();
+    $stmt = $pdo->query('SELECT * FROM products'); // Adjusted to target 'products' table
+    $products = [];
     while ($row = $stmt->fetch()) {
-        $customers[] = $row;
+        $products[] = $row;
+    }
+    var_dump($products);
+    return $products;
+}
+
+function getProductDetailsPDO($productID): ?array {
+    $pdo = getConnectionPDO();
+    $stmt = $pdo->prepare("SELECT * FROM products WHERE id = :id");
+    $stmt->bindValue(':id', $productID, PDO::PARAM_INT);
+    $stmt->execute();
+    $product = $stmt->fetch(PDO::FETCH_ASSOC);
+    return $product ?: null;
+}
+
+function getFilteredProducts($status = 'any', $onSale = 0): array {
+    $pdo = getConnectionPDO();
+    $query = "SELECT * FROM products WHERE 1";
+    $params = [];
+
+    if ($status !== 'any') {
+        $query .= " AND status = :status";
+        $params[':status'] = $status;
+    }
+    if ($onSale) {
+        $query .= " AND on_sale = :on_sale";
+        $params[':on_sale'] = 1;
     }
 
-    return $customers;
+    $stmt = $pdo->prepare($query);
+
+    foreach ($params as $key => $value) {
+        $stmt->bindValue($key, $value);
+    }
+
+    $stmt->execute();
+    return $stmt->fetchAll();
 }
 
-function getCustomerPDO(int $id): array|bool
-{
-    //get connection
-    $db = getConnectionPDO();
 
-    //create query
-    $stmt = $db->prepare('SELECT * FROM tblCustomer WHERE customerId=?');
 
-    //execute query
-    $stmt->execute([$id]);
-
-    //get results
-    $result = $stmt->fetch();
-
-    return $result;
+function getSessionMessage(): ?string {
+    if (isset($_SESSION['message'])) {
+        $message = $_SESSION['message'];
+        unset($_SESSION['message']); // Clear the message after retrieving it
+        return $message;
+    }
+    return null; // Return null if no message is set
 }
 
-function insertCustomerPDO(array $data): bool
-{
-    //get connection
+function insertProductPDO(array $data): bool {
     $db = getConnectionPDO();
 
-    // method one
-    // $stmt = $db->prepare("
-    // INSERT INTO tblCustomer (lastName, firstName, address, city, province, postal, phone)
-    // VALUES (?, ?, ?, ?, ?, ?, ?)");
-
-    // return $stmt->execute($data);
-
-    // method two
     $stmt = $db->prepare("
-    INSERT INTO tblCustomer (lastName, firstName, address, city, province, postal, phone, photo)
-    VALUES (:lastName, :firstName, :address, :city, :province, :postal, :phone, :photo)");
+    INSERT INTO products (title, description, price, photo, status, on_sale)
+    VALUES (:title, :description, :price, :photo, :status, :on_sale)");
 
-    $stmt->bindValue(':lastName', $data['lastName']);
-    $stmt->bindValue(':firstName', $data['firstName']);
-    $stmt->bindValue(':address', $data['address']);
-    $stmt->bindValue(':city', $data['city']);
-    $stmt->bindValue(':province', $data['province']);
-    $stmt->bindValue(':postal', $data['postal']);
-    $stmt->bindValue(':phone', $data['phone']);
+    $stmt->bindValue(':title', $data['title']);
+    $stmt->bindValue(':description', $data['description']);
+    $stmt->bindValue(':price', $data['price']);
     $stmt->bindValue(':photo', $data['photo']);
+    $stmt->bindValue(':status', $data['status']);
+    $stmt->bindValue(':on_sale', $data['on_sale'], PDO::PARAM_INT);
 
     return $stmt->execute();
 }
 
-function updateCustomerPDO(int $id, array $data): bool
-{
-    // unset submit button
-    unset($data['submit']);
 
-    //get connection
-    $db = getConnectionPDO();
-
-    // add customer id to data array
-    $data['customerId'] = $id;
-
-    //construct set string
-    $set = "SET lastName=:lastName, firstName=:firstName, address=:address, city=:city, province=:province, postal=:postal, phone=:phone";
-
-    // if photo provided, add to set string
-    if (!empty($data['photo'])) {
-        $set .= ', photo=:photo';
-    }
-
-    $stmt = $db->prepare("
-        UPDATE tblCustomer
-        $set
-        WHERE customerId=:customerId");
-
-    return $stmt->execute($data);
-
-    // return $stmt->execute([$data['lastName'], $data['firstName'], $data['address'], $data['city'], $data['province'], $data['postal'], $data['phone'], $data['photo'], $id]);
+function updateProductPDO($productID, array $data): bool {
+    $pdo = getConnectionPDO();
+    $stmt = $pdo->prepare("UPDATE products SET title = :title, description = :description, price = :price, photo = :photo, status = :status, on_sale = :on_sale WHERE id = :id");
+    // Bind values
+    $stmt->bindValue(':id', $productID, PDO::PARAM_INT);
+    // Bind other values similarly
+    return $stmt->execute();
 }
 
-function deleteCustomerPDO(int $id): bool
-{
-    //get connection
-    $db = getConnectionPDO();
-
-    $stmt = $db->prepare("DELETE FROM tblCustomer WHERE customerId=?");
-
-    $_SESSION['message'] = "Customer <i>$id</i> deleted successfully";
-
-    return $stmt->execute([$id]);
+function getReviewsForProduct($productID): array {
+    $pdo = getConnectionPDO();
+    $stmt = $pdo->prepare("SELECT * FROM reviews WHERE product_id = :product_id ORDER BY date DESC");
+    $stmt->bindValue(':product_id', $productID, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetchAll();
 }
 
-function getSessionMessage(): bool|string
-{
-    $message = '';
 
-    if (isset($_SESSION['message'])) {
-        $message = $_SESSION['message'];
-        unset($_SESSION['message']);
-    }
-
-    return $message;
-}
-
-function resizeImage(string $file, int $width, int $height): string
-{
-    // returns an array containing information about the path
-    $pathParts = pathinfo($file);
-
-    //get extension
-    $extension = $pathParts['extension'];
-
-    //create new filename
-    $fileName = $pathParts['filename'] . '-' . $width . 'x' . $height . '.' . $extension;
-
-    //if file already exists, return path
-    if (file_exists(UPLOADS_PATH . DIRECTORY_SEPARATOR . $fileName)) {
-        return UPLOADS_DIR . DIRECTORY_SEPARATOR . $fileName;
-    }
-
-    // create new Imagick object
-    $img = new \Imagick(UPLOADS_PATH . DIRECTORY_SEPARATOR . $file);
-
-    // resize image see https://www.php.net/manual/en/imagick.resizeimage.php
-    $img->resizeImage($width, $height, \Imagick::FILTER_LANCZOS, 1, true);
-
-    $img->writeImage(UPLOADS_DIR . DIRECTORY_SEPARATOR . $fileName);
-
-    return UPLOADS_DIR . DIRECTORY_SEPARATOR . $fileName;
-}

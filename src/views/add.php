@@ -1,218 +1,154 @@
 <?php
+// Start output buffering to prevent "headers already sent" issues
+ob_start();
 
-$btnText = 'Add Customer';
-$customerID = null;
+$btnText = 'Add Product';
+$productID = null;
 $formAction = htmlspecialchars($_SERVER["PHP_SELF"]);
 
-// errors array
-$formErrors = [
-    'lastName' => '',
-    'firstName' => '',
-    'address' => '',
-    'city' => '',
-    'province' => '',
-    'postal' => '',
-    'phone' => '',
-    'photo' => '',
-];
-$formInputs = $formErrors;
+// Initialize or reset errors and input values
+$formErrors = ['title' => '', 'description' => '', 'price' => '', 'photo' => '', 'status' => '', 'on_sale' => ''];
+$formInputs = ['title' => '', 'description' => '', 'price' => '', 'photo' => '', 'status' => '', 'on_sale' => ''];
 $formSuccess = false;
 
 if (isset($_GET['id'])) {
-    $customerID = filter_input(INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT);
-    $btnText = 'Update Customer';
-    $formAction .= '?id=' . $customerID;
+    $productID = filter_input(INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT);
+    $btnText = 'Update Product';
+    $formAction .= '?id=' . $productID;
+    // Fetch product details to prefill the form for updating
+    $product = getProductDetailsPDO($productID);
+    if ($product) {
+        $formInputs = array_merge($formInputs, $product);
+    } else {
+        $_SESSION['message'] = "Product not found.";
+        header("Location: index.php");
+        exit;
+    }
 }
 
-if (isset($_POST['submit'])) {
-    $formInputs['lastName'] = trim(filter_input(INPUT_POST, 'lastName'));
-    $formInputs['firstName'] = trim(filter_input(INPUT_POST, 'firstName'));
-    $formInputs['address'] = trim(filter_input(INPUT_POST, 'address'));
-    $formInputs['city'] = trim(filter_input(INPUT_POST, 'city'));
-    $formInputs['province'] = trim(filter_input(INPUT_POST, 'province'));
-    $formInputs['postal'] = trim(filter_input(INPUT_POST, 'postal'));
-    $formInputs['phone'] = trim(filter_input(INPUT_POST, 'phone'));
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Sanitize and validate inputs
+    $formInputs['title'] = filter_input(INPUT_POST, 'title', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+    $formInputs['description'] = filter_input(INPUT_POST, 'description', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+    $formInputs['price'] = filter_input(INPUT_POST, 'price', FILTER_VALIDATE_FLOAT);
+    $formInputs['status'] = filter_input(INPUT_POST, 'status', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+    $formInputs['on_sale'] = isset($_POST['on_sale']) ? 1 : 0;
 
-    if (empty($formInputs['lastName'])) {
-        $formErrors['lastName'] = 'Last Name is required';
-        // check if name only contains letters and whitespace
-    } else if (strlen($formInputs['lastName']) > 50) {
-        $formErrors['lastName'] = 'Last Name must be less than 50 characters';
-    } else if (!preg_match("/^[a-zA-Z ]*$/", $formInputs['lastName'])) {
-        $formErrors['lastName'] = 'Only letters and white space allowed';
+
+    // Validate inputs (basic example)
+    if (empty($formInputs['title'])) {
+        $formErrors['title'] = 'Title is required.';
     }
 
-    if (empty($formInputs['firstName'])) {
-        $formErrors['firstName'] = 'First Name is required';
-    } else if (strlen($formInputs['firstName']) > 50) {
-        $formErrors['firstName'] = 'First Name must be less than 50 characters';
-    } else if (!preg_match("/^[a-zA-Z ]*$/", $formInputs['firstName'])) {
-        $formErrors['firstName'] = 'Only letters and white space allowed';
-    }
+    // Handle file upload for 'photo'
+    if (isset($_FILES['photo']) && $_FILES['photo']['error'] == UPLOAD_ERR_OK) {
+        $uploadsDir = $_SERVER['DOCUMENT_ROOT'] . '/_assets'; // Adjust as necessary
+        $fileName = time() . '-' . basename($_FILES['photo']['name']); // To avoid file name conflicts
+        $targetPath = $uploadsDir . '/' . $fileName;
 
-    if (empty($formInputs['postal'])) {
-        $formErrors['postal'] = 'Postal is required';
-        // check if postal is in format A1A 1A1 or A1A1A1
-        // ^ - start of string
-        // [A-Za-z] - any letter
-        // \d - any digit
-        // [ ]? - optional space
-        // $ - end of string
-    } else if (!preg_match("/^[A-Za-z]\d[A-Za-z][ ]?\d[A-Za-z]\d$/", $formInputs['postal'])) {
-        $formErrors['postal'] = 'Postal must be in format A1A 1A1 or A1A1A1';
-    }
-
-    // check if photo was uploaded - UPLOAD_ERR_OK is a constant that equals 0 - means no errors
-    if ($_FILES['photo']['error'] == UPLOAD_ERR_OK) {
-        $maxFileSize = 1024 * (1024 * 2); //2MB
-
-        //our allowed file extensions
-        $allowedFileExtension = [
-            'jpg', 'jpeg', 'png',
-        ];
-
-        // get file name - only first 100 characters
-        $fileName = substr($_FILES['photo']['name'], 0, 100);
-
-        // get target path with file name - basename() gets the file name
-        $target = UPLOADS_DIR . DIRECTORY_SEPARATOR . basename($fileName);
-        // get file extension
-        $extension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
-
-        //check size
-        if ($_FILES['photo']['size'] >= $maxFileSize) {
-            $formErrors['photo'] = 'Uploaded file exceeds maximum file size of ' . $maxFileSize / 1024 / 1024 . 'MB';
-        }
-
-        //check file type
-        if (!in_array($extension, $allowedFileExtension)) {
-            $formErrors['photo'] = 'Incorrect file type. Please upload a ' . implode(', ', $allowedFileExtension);
-        }
-
-        // no errors, attempt to upload
-        if (!$formErrors['photo']) {
-            // upload image to server
-
-            // make uploads directory if it doesn't exist
-            if (!is_dir(UPLOADS_DIR)) {
-                mkdir(UPLOADS_DIR);
-            }
-
-            if (!move_uploaded_file($_FILES['photo']['tmp_name'], $target)) {
-                $formErrors['photo'] = 'Sorry, there was a problem uploading your file. Please try again.';
-            }
-
-            $_POST['photo'] = $fileName;
+        if (move_uploaded_file($_FILES['photo']['tmp_name'], $targetPath)) {
+            $formInputs['photo'] = $fileName; // Adjust according to how you want to save the file name in the DB
+        } else {
+            $formErrors['photo'] = 'Failed to upload photo.';
         }
     }
 
-    if (implode('', $formErrors) === '') {
-        if ($customerID) {
-            updateCustomerPDO($customerID, $_POST);
-            $formSuccess = true;
-            $_SESSION['message'] = 'Updated Customer';
-            header('Location: edit.php?' . http_build_query(['id' => $customerID]));
+    // Check for errors before proceeding to database operation
+    if (array_filter($formErrors) === []) {
+        if ($productID) {
+            // Update product
+            $success = updateProductPDO($productID, $formInputs);
+        } else {
+            // Add new product
+            $success = insertProductPDO($formInputs);
+        }
+
+        if ($success) {
+            $_SESSION['message'] = $productID ? 'Product updated successfully.' : 'Product added successfully.';
+            header("Location: index.php");
             exit;
         } else {
-            insertCustomerPDO($_POST);
-            $formSuccess = true;
-            $_SESSION['message'] = 'New Customer added';
-            header('Location: add.php');
-            exit;
+            $_SESSION['message'] = 'An error occurred.';
         }
     }
 }
 
-if ($customerID) {
-    $customer = getCustomerPDO($customerID);
-
-    if ($customer) {
-        $formInputs = $customer;
+if ($productID) {
+    // Fetch product details to prefill the form for updating
+    $product = getProductDetailsPDO($productID);
+    if ($product) {
+        // Merge the product details with form inputs to prefill the form
+        $formInputs = array_merge($formInputs, $product);
     } else {
-        return http_response_code(404);
+        // Handle the case where no product is found for the given ID
+        $_SESSION['message'] = "Product not found.";
+        header("Location: index.php");
+        exit;
     }
 }
 
+ob_end_flush();
 ?>
 
 <!doctype html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>PHP</title>
-    <link rel="stylesheet" href="/assets/dist/main.css" />
+    <title><?= $btnText; ?></title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" /> <!-- Use CDN for Tailwind CSS -->
 </head>
+<body class="bg-gray-100 p-5">
+    <div class="m-auto max-w-4xl bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        <h1 class="block w-full text-center text-gray-800 text-2xl font-bold mb-6"><?= $btnText; ?></h1>
+        <?php if ($formSuccess): ?>
+            <span class="block text-green-500 text-sm font-bold mb-4">Product added successfully!</span>
+        <?php endif; ?>
+        <form method="POST" action="<?= $formAction; ?>" enctype="multipart/form-data">
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="title">Title</label>
+                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" id="title" name="title" value="<?= htmlspecialchars($formInputs['title']); ?>" required>
+                <p class="text-red-500 text-xs italic"><?= $formErrors['title']; ?></p>
+            </div>
 
-<body class="p-5">
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="description">Description</label>
+                <textarea class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="description" name="description" required><?= htmlspecialchars($formInputs['description']); ?></textarea>
+                <p class="text-red-500 text-xs italic"><?= $formErrors['description']; ?></p>
+            </div>
 
-    <div class="m-auto max-w-6xl">
-        <div class="w-10/12 md:w-4/12">
-            <?php if (isset($_SESSION['message'])) : ?>
-                <span class="text-green-500"><?= getSessionMessage(); ?></span>
-            <?php endif; ?>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="price">Price ($)</label>
+                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="number" step="0.01" id="price" name="price" value="<?= htmlspecialchars($formInputs['price']); ?>" required>
+                <p class="text-red-500 text-xs italic"><?= $formErrors['price']; ?></p>
+            </div>
 
-            <form method="POST" action="<?= $formAction; ?>" enctype="multipart/form-data">
-                <div class="mb-3">
-                    <label class="block text-gray-700 font-bold mb-2" for="lastName">Last Name</label>
-                    <input type="text" id="lastName" name="lastName" value="<?= htmlspecialchars($formInputs['lastName']); ?>" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
-                    <span class="text-red-500"><?= $formErrors['lastName']; ?></span>
-                </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="photo">Photo</label>
+                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="file" id="photo" name="photo">
+                <p class="text-red-500 text-xs italic"><?= $formErrors['photo']; ?></p>
+            </div>
 
-                <div class="mb-3">
-                    <label class="block text-gray-700 font-bold mb-2" for="firstName">First Name</label>
-                    <input type="text" id="firstName" name="firstName" value="<?= htmlspecialchars($formInputs['firstName']); ?>" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
-                    <span class="text-red-500"><?= $formErrors['firstName']; ?></span>
-                </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="status">Status</label>
+                <select class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="status" name="status">
+                    <option value="new" <?= $formInputs['status'] == 'new' ? 'selected' : ''; ?>>New</option>
+                    <option value="used" <?= $formInputs['status'] == 'used' ? 'selected' : ''; ?>>Used</option>
+                </select>
+                <p class="text-red-500 text-xs italic"><?= $formErrors['status']; ?></p>
+            </div>
 
-                <div class="mb-3">
-                    <label class="block text-gray-700 font-bold mb-2" for="address">Address</label>
-                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" id="address" name="address" />
-                </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="on_sale">On Sale</label>
+                <input class="leading-tight" type="checkbox" id="on_sale" name="on_sale" value="1" <?= $formInputs['on_sale'] ? 'checked' : ''; ?>>
+                <p class="text-red-500 text-xs italic"><?= $formErrors['on_sale']; ?></p>
+            </div>
 
-                <div class="mb-3">
-                    <label class="block text-gray-700 font-bold mb-2" for="city">City</label>
-                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" id="city" name="city" />
-                </div>
-
-                <div class="mb-3">
-                    <label class="block text-gray-700 font-bold mb-2" for="province">Province</label>
-                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" id="province" name="province" />
-                </div>
-
-                <div class="mb-3">
-                    <label class="block text-gray-700 font-bold mb-2" for="postal">Postal</label>
-                    <input value="<?= htmlspecialchars($formInputs['postal']); ?>" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" id="postal" name="postal" />
-                    <span class="text-red-500"><?= $formErrors['postal']; ?></span>
-                </div>
-
-                <div class="mb-3">
-                    <label class="block text-gray-700 font-bold mb-2" for="phone">Phone</label>
-                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" id="phone" name="phone" />
-                </div>
-
-                <div class="mb-3">
-                    <label class="block text-gray-700 font-bold mb-2" for="photo">Photo</label>
-                    <input type="file" name="photo" />
-                    <span class="text-red-500"><?= $formErrors['photo']; ?></span>
-
-                    <?php if (isset($formInputs['photo'])) : ?>
-                        <img src="<?= resizeImage($formInputs['photo'], 150, 150); ?>" alt="<?= $formInputs['photo']; ?>" width="150" />
-                    <?php endif; ?>
-                </div>
-
-                <div class="mt-5">
-                    <input class="inline-block border border-slate-800 bg-slate-500 hover:bg-slate-700 transition-colors ease-linear delay-100 text-slate-50 p-2" type="submit" name="submit" value="<?= $btnText; ?>" />
-                    <a href="index.php" class="inline-block border border-slate-800 bg-slate-500 hover:bg-slate-700 transition-colors ease-linear delay-100 text-slate-50 p-2">Cancel</a>
-                </div>
-            </form>
-        </div>
+            <div class="flex items-center justify-between">
+                <input class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit" name="submit" value="<?= $btnText; ?>">
+                <a class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800" href="index.php">Cancel</a>
+            </div>
+        </form>
     </div>
-
 </body>
-
-<script src="./assets/dist/main.bundle.js">
-</script>
-
 </html>
