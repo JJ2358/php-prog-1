@@ -138,4 +138,22 @@ function getReviewsForProduct($productID): array {
     return $stmt->fetchAll();
 }
 
+function insertReview($productID, $rating, $firstName, $lastName, $comment): bool {
+    $pdo = getConnectionPDO();
+    $stmt = $pdo->prepare("INSERT INTO reviews (product_id, rating, first_name, last_name, comment) VALUES (:product_id, :rating, :first_name, :last_name, :comment)");
+    $stmt->bindValue(':product_id', $productID, PDO::PARAM_INT);
+    $stmt->bindValue(':rating', $rating, PDO::PARAM_INT);
+    $stmt->bindValue(':first_name', $firstName);
+    $stmt->bindValue(':last_name', $lastName);
+    $stmt->bindValue(':comment', $comment);
+    return $stmt->execute();
+}
+function deleteReview($reviewId): bool {
+    $pdo = getConnectionPDO();
+    $stmt = $pdo->prepare("DELETE FROM reviews WHERE id = :id");
+    $stmt->bindValue(':id', $reviewId, PDO::PARAM_INT);
+    return $stmt->execute();
+}
+
+
 
