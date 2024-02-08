@@ -157,3 +157,25 @@ function deleteReview($reviewId): bool {
 
 
 
+function getReviewDetails(int $reviewID): ?array {
+    $pdo = getConnectionPDO(); // Directly get the PDO connection
+
+    $stmt = $pdo->prepare("SELECT * FROM reviews WHERE id = :id");
+    $stmt->execute(['id' => $reviewID]);
+
+    $review = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    return $review ?: null;
+}
+
+function updateReview(int $reviewID, int $rating, string $firstName, string $lastName, string $comment): bool {
+    $pdo = getConnectionPDO(); // Ensure this line correctly initializes your PDO connection
+    $stmt = $pdo->prepare("UPDATE reviews SET rating = :rating, first_name = :first_name, last_name = :last_name, comment = :comment WHERE id = :id");
+    return $stmt->execute([
+        ':rating' => $rating,
+        ':first_name' => $firstName,
+        ':last_name' => $lastName,
+        ':comment' => $comment,
+        ':id' => $reviewID
+    ]);
+}
