@@ -15,9 +15,11 @@
             ← Back
         </a>
     </div>
+    <?= var_dump($product['photo']) ?>
     <div class="max-w-4xl mx-auto bg-white p-5 rounded shadow">
         <h1 class="text-2xl font-bold"><?= htmlspecialchars($product['title']); ?></h1>
-        <img src="<?= htmlspecialchars($product['photo']); ?>" alt="<?= htmlspecialchars($product['title']); ?>" class="w-full h-auto mt-4 mb-4">
+        <img src="<?= htmlspecialchars($product['photo']); ?>" alt="Product Image">
+
         <p><?= nl2br(htmlspecialchars($product['description'])); ?></p>
         <p class="mt-2"><strong>Price:</strong> $<?= htmlspecialchars($product['price']); ?></p>
         <p><strong>Status:</strong> <?= htmlspecialchars($product['status']); ?></p>

@@ -51,6 +51,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         } else {
             $formErrors['photo'] = 'Failed to upload photo.';
         }
+        if (empty($formErrors)) {
+            // Attempt database operation...
+            if ($success) {
+                $_SESSION['message'] = 'Success message.';
+                header("Location: index.php");
+                exit; // Ensure no further output is sent to avoid "headers already sent" warning
+            } else {
+                $_SESSION['message'] = 'Error message.';
+                // Consider redirecting or handling the error appropriately
+            }
+        }
     }
 
     // Check for errors before proceeding to database operation
@@ -96,39 +107,33 @@ ob_end_flush();
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= $btnText; ?></title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" /> <!-- Use CDN for Tailwind CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" />
 </head>
 <body class="bg-gray-100 p-5">
     <div class="m-auto max-w-4xl bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
         <h1 class="block w-full text-center text-gray-800 text-2xl font-bold mb-6"><?= $btnText; ?></h1>
-        <?php if ($formSuccess): ?>
-            <span class="block text-green-500 text-sm font-bold mb-4">Product added successfully!</span>
-        <?php endif; ?>
         <form method="POST" action="<?= $formAction; ?>" enctype="multipart/form-data">
             <div class="mb-4">
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="title">Title</label>
-                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" id="title" name="title" value="<?= htmlspecialchars($formInputs['title']); ?>" required>
+                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="title" name="title" type="text" value="<?= htmlspecialchars($formInputs['title']); ?>" required>
                 <p class="text-red-500 text-xs italic"><?= $formErrors['title']; ?></p>
             </div>
-
             <div class="mb-4">
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="description">Description</label>
                 <textarea class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="description" name="description" required><?= htmlspecialchars($formInputs['description']); ?></textarea>
                 <p class="text-red-500 text-xs italic"><?= $formErrors['description']; ?></p>
             </div>
-
             <div class="mb-4">
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="price">Price ($)</label>
-                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="number" step="0.01" id="price" name="price" value="<?= htmlspecialchars($formInputs['price']); ?>" required>
+                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="price" name="price" type="number" step="0.01" value="<?= htmlspecialchars($formInputs['price']); ?>" required>
                 <p class="text-red-500 text-xs italic"><?= $formErrors['price']; ?></p>
             </div>
-
             <div class="mb-4">
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="photo">Photo</label>
-                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="file" id="photo" name="photo">
+                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="photo" name="photo" type="file">
                 <p class="text-red-500 text-xs italic"><?= $formErrors['photo']; ?></p>
-            </div>
 
+            </div>
             <div class="mb-4">
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="status">Status</label>
                 <select class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="status" name="status">
@@ -137,16 +142,15 @@ ob_end_flush();
                 </select>
                 <p class="text-red-500 text-xs italic"><?= $formErrors['status']; ?></p>
             </div>
-
             <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="on_sale">On Sale</label>
-                <input class="leading-tight" type="checkbox" id="on_sale" name="on_sale" value="1" <?= $formInputs['on_sale'] ? 'checked' : ''; ?>>
-                <p class="text-red-500 text-xs italic"><?= $formErrors['on_sale']; ?></p>
+                <label class="flex items-center">
+                    <input class="form-checkbox" type="checkbox" id="on_sale" name="on_sale" value="1" <?= $formInputs['on_sale'] ? 'checked' : ''; ?>>
+                    <span class="ml-2">On Sale</span>
+                </label>
             </div>
-
             <div class="flex items-center justify-between">
-                <input class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit" name="submit" value="<?= $btnText; ?>">
-                <a class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800" href="index.php">Cancel</a>
+                <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit"><?= $btnText; ?></button>
+                <a href="index.php" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Back to List</a>
             </div>
         </form>
     </div>
