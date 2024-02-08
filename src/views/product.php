@@ -34,6 +34,7 @@
                     <div class="mt-2">
                         <a href="edit_review.php?review_id=<?= $review['id']; ?>&product_id=<?= $product['id']; ?>" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded">Edit</a>
                         <a href="delete_review.php?review_id=<?= $review['id']; ?>&product_id=<?= $product['id']; ?>" onclick="return confirm('Are you sure you want to delete this review?');" class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">Delete</a>
+                        <a href="#top" class="inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-0.5 px-2 mx-1.5 rounded transition ease-in-out duration-150">↑</a>
                     </div>
                 </div>
             <?php endforeach; ?>
