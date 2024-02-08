@@ -5,10 +5,10 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
     return http_response_code(404);
 }
 
-if (isset($_POST['id']) && is_numeric($_POST['id'])) {
-    deleteCustomerPDO($_POST['id']);
-    return header('Location: index.php');
-}
+// if (isset($_POST['id']) && is_numeric($_POST['id'])) {
+//     deleteCustomerPDO($_POST['id']);
+//     return header('Location: index.php');
+// }
 
 ?>
 
