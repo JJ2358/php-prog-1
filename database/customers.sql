@@ -41,9 +41,9 @@ CREATE TABLE IF NOT EXISTS products (
 
 INSERT INTO products (title, description, price, photo, status, on_sale) VALUES
 ('Product 1', 'Description for product 1', 19.99, '65c57bc9391aa-toppc.jpg', 'new', FALSE),
-('Product 2', 'Description for product 2', 29.99, '_assets/burnedlaptop.jpg', 'used', TRUE),
-('Product 3', 'Description for product 3', 39.99, '_assets/burnedlaptop.jpg', 'new', FALSE),
-('Example Product', 'This is an example product description.', 99.99, '_assets/burnedlaptop.jpg', 'new', FALSE);
+('Product 2', 'Description for product 2', 29.99, '65c56ea3b2f8d-burnedlaptop.jpg', 'used', TRUE),
+('Product 3', 'Description for product 3', 39.99, '65c56ea3b2f8d-burnedlaptop.jpg', 'new', FALSE),
+('Example Product', 'This is an example product description.', 99.99, '65c56ea3b2f8d-burnedlaptop.jpg', 'new', FALSE);
 
 
 
