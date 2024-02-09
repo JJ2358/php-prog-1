@@ -34,6 +34,7 @@ if (isset($_GET['forget_me'])) {
     exit;
 }
 
+
 $reviews = getReviewsForProduct($productID);
 
 require dirname(__DIR__) . '/views/product.php';

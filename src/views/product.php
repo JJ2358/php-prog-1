@@ -1,4 +1,33 @@
+<?php
+$imageUrl = $product['photo'];
+echo "Image URL: " . $imageUrl;
+var_dump('../_assets/' . htmlspecialchars($product['photo']));
+var_dump($product);
 
+$directoryPath = '../_assets';
+$files = scandir($directoryPath);
+
+if ($files !== false) {
+    // Iterate through the array to display file names
+    foreach ($files as $file) {
+        // Skip '.' and '..' entries
+        if ($file !== "." && $file !== "..") {
+            echo $file . "<br>";
+        }
+    }
+} else {
+    echo "Could not read the directory.";
+}
+
+if (!empty($product['photo'])) {
+    // Assuming the script is executed in a path where '../_assets/' correctly points to the _assets folder
+    $imageUrl = '../_assets/' . htmlspecialchars($product['photo']);
+    echo "<img src='$imageUrl' alt='Product Image'>";
+} else {
+    echo "No image available.";
+}
+
+?>
 
 <!doctype html>
 <html lang="en">
@@ -15,10 +44,16 @@
             ← Back
         </a>
     </div>
-    <?= var_dump($product['photo']) ?>
+
+
     <div class="max-w-4xl mx-auto bg-white p-5 rounded shadow">
         <h1 class="text-2xl font-bold"><?= htmlspecialchars($product['title']); ?></h1>
-        <img src="<?= htmlspecialchars($product['photo']); ?>" alt="Product Image">
+
+        <?php if (!empty($product['photo'])): ?>
+            <img src="../_assets/<?= htmlspecialchars($product['photo']); ?>" alt="Product Image" style="max-width: 100%; height: auto;">
+        <?php else: ?>
+            <p>No image available.</p>
+        <?php endif; ?>
 
         <p><?= nl2br(htmlspecialchars($product['description'])); ?></p>
         <p class="mt-2"><strong>Price:</strong> $<?= htmlspecialchars($product['price']); ?></p>
@@ -43,7 +78,6 @@
         <?php else: ?>
             <p>No reviews yet.</p>
         <?php endif; ?>
-
         <?php
         // Check if the user's name is stored in the session
         $firstName = $_SESSION['user_first_name'] ?? '';

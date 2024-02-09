@@ -40,10 +40,11 @@ CREATE TABLE IF NOT EXISTS products (
 );
 
 INSERT INTO products (title, description, price, photo, status, on_sale) VALUES
-('Product 1', 'Description for product 1', 19.99, 'path/to/photo1.jpg', 'new', FALSE),
-('Product 2', 'Description for product 2', 29.99, 'path/to/photo2.jpg', 'used', TRUE),
-('Product 3', 'Description for product 3', 39.99, 'path/to/photo3.jpg', 'new', FALSE),
-('Example Product', 'This is an example product description.', 99.99, 'path/to/photo.jpg', 'new', FALSE);
+('Product 1', 'Description for product 1', 19.99, '_assets/burnedlaptop.jpg', 'new', FALSE),
+('Product 2', 'Description for product 2', 29.99, '_assets/burnedlaptop.jpg', 'used', TRUE),
+('Product 3', 'Description for product 3', 39.99, '_assets/burnedlaptop.jpg', 'new', FALSE),
+('Example Product', 'This is an example product description.', 99.99, '_assets/burnedlaptop.jpg', 'new', FALSE);
+
 
 
 CREATE TABLE reviews (

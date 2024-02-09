@@ -179,3 +179,16 @@ function updateReview(int $reviewID, int $rating, string $firstName, string $las
         ':id' => $reviewID
     ]);
 }
+
+
+function uploadImageAndStorePath($imageFile) {
+    $targetDir = dirname(__DIR__) . '/src/_assets/'; // Updated path
+    $fileName = uniqid() . '-' . basename($imageFile['name']);
+    $targetFilePath = $targetDir . $fileName;
+
+    if (move_uploaded_file($imageFile['tmp_name'], $targetFilePath)) {
+        return ['success' => true, 'path' => $fileName];
+    } else {
+        return ['success' => false, 'error' => 'Failed to upload image.'];
+    }
+}
