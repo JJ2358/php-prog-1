@@ -20,7 +20,7 @@
     <div class="max-w-4xl mx-auto bg-white p-5 rounded shadow">
         <h1 class="text-2xl font-bold"><?= htmlspecialchars($product['title']); ?></h1>
 
-        <img src="<?=htmlspecialchars($product['photo']); ?>" alt="Product Image">
+        <img src="<?=htmlspecialchars($product['photo']); ?>" alt="Product Image" class="my-2" width="150" height="200">
 
 
         <p><?= nl2br(htmlspecialchars($product['description'])); ?></p>
@@ -95,8 +95,6 @@
                 <?php endif; ?>
             </form>
         </div>
-            <!-- "Forget Me" Link (Shown if user's name is remembered) -->
-
     </div>
 </body>
 </html>

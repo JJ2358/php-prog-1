@@ -57,8 +57,8 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?= htmlspecialchars($product['status']); ?></td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?= $product['on_sale'] ? 'Yes' : 'No'; ?></td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <a href="edit_product.php?id=<?= $product['id']; ?>" class="text-indigo-600 hover:text-indigo-900 mr-4">Edit</a>
-                                <a href="delete_product.php?id=<?= $product['id']; ?>" class="text-red-600 hover:text-red-900" onclick="return confirm('Are you sure you want to delete this product?');">Delete</a>
+                                <!-- <a href="edit_product.php?id=<?= $product['id']; ?>" class="text-indigo-600 hover:text-indigo-900 mr-4">Edit</a> -->
+                                <!-- <a href="delete_product.php?id=<?= $product['id']; ?>" class="text-red-600 hover:text-red-900" onclick="return confirm('Are you sure you want to delete this product?');">Delete</a> -->
                             </td>
                         </tr>
                     <?php endforeach; ?>
