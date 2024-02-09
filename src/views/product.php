@@ -1,41 +1,3 @@
-<?php
-// $imageUrl = $product['photo'];
-// echo "Image URL: " . $imageUrl;
-// var_dump('../_assets/' . htmlspecialchars($product['photo']));
-// var_dump($product['photo']);
-
-// $directoryPath = '../_assets';
-// $files = scandir($directoryPath);
-
-// if ($files !== false) {
-//     // Iterate through the array to display file names
-//     foreach ($files as $file) {
-//         // Skip '.' and '..' entries
-//         if ($file !== "." && $file !== "..") {
-//             echo $file . "<br>";
-//         }
-//     }
-// } else {
-//     echo "Could not read the directory.";
-// }
-
-if (!empty($product['photo'])) {
-    // Adjust the path according to the actual location of the _assets directory
-    $imageUrl = 'src/_assets/' . htmlspecialchars($product['photo']);
-    echo "<img src='$imageUrl' alt='Product Image'>";
-} else {
-    echo "No image available.";
-}
-Var_dump($imageUrl);
-echo "<pre>";
-var_dump($productID);
-var_dump($product);
-echo "</pre>";
-
-var_dump(htmlspecialchars($product['photo']));
-
-
-?>
 
 
 <!doctype html>
@@ -110,7 +72,7 @@ var_dump(htmlspecialchars($product['photo']));
                     <option value="3">3 Stars</option>
                     <option value="4">4 Stars</option>
                     <option value="5">5 Stars</option>
-                </select>src/_assets
+                </select>
             </div>
             <!-- First Name Input -->
             <div class="mb-4">
@@ -134,11 +96,7 @@ var_dump(htmlspecialchars($product['photo']));
             </form>
         </div>
             <!-- "Forget Me" Link (Shown if user's name is remembered) -->
-        <?php if (!empty($firstName) || !empty($lastName)): ?>
-            <div class="mt-4">
-                <a href="product.php?id=<?= $productID; ?>&forget_me=1" class="text-sm text-blue-500 hover:text-blue-800">Forget Me</a>
-            </div>
-        <?php endif; ?>
+
     </div>
 </body>
 </html>

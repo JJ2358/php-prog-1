@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 session_start();
-require dirname(__DIR__) . '/app/App.php';
+require dirname(__DIR__) . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'App.php';
 
 $productID = $_GET['id'] ?? null;
 $product = getProductDetailsPDO($productID);

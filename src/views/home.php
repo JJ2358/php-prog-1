@@ -16,7 +16,7 @@
             <?php endif; ?>
         </div>
         <div class="mb-4">
-            <a href="add.php" class="inline-flex items-center px-4 py-2 bg-blue-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-900 focus:outline-none focus:border-blue-900 focus:ring ring-blue-300 disabled:opacity-25 transition ease-in-out duration-150">Add Product</a>
+            <a href="add.php" class="inline-flex items-center px-4 py-2 bg-blue-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-900 focus:outline-none focus:border-blue-900 focus:ring ring-blue-300 disabled:opacity-25 transition ease-in-out duration-150">Add Product</a> (WIP)
         </div>
         <form action="index.php" method="GET" class="mb-4">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">

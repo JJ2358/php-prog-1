@@ -117,7 +117,13 @@ function insertProductPDO(array $data): bool {
     $stmt->bindValue(':status', $data['status']);
     $stmt->bindValue(':on_sale', $data['on_sale'], PDO::PARAM_INT);
 
-    return $stmt->execute();
+    try {
+        $stmt->execute();
+        return true;
+    } catch (PDOException $e) {
+        error_log("Database Error: " . $e->getMessage());
+        return false;
+    }
 }
 
 
@@ -182,15 +188,24 @@ function updateReview(int $reviewID, int $rating, string $firstName, string $las
 
 
 function uploadImageAndStorePath($imageFile) {
-    $targetDir = dirname(__DIR__) . '/_assets/';
+    // Use __DIR__ to get the directory of the current script,
+    // then construct the path to the _assets directory.
+    $targetDir = __DIR__ . '/src/_assets/';
+
+    // Check if the _assets directory exists; if not, create it.
     if (!file_exists($targetDir)) {
-        mkdir($targetDir, 0755, true); // This will create the directory if it doesn't exist
+        mkdir($targetDir, 0755, true); // This will create the directory if it doesn't exist.
     }
+
+    // Generate a unique filename for the uploaded image to prevent overwriting existing files.
     $fileName = uniqid() . '-' . basename($imageFile['name']);
     $targetFilePath = $targetDir . $fileName;
 
+    // Attempt to move the uploaded file to the target directory.
     if (move_uploaded_file($imageFile['tmp_name'], $targetFilePath)) {
-        return ['success' => true, 'path' => $fileName];
+        // On success, return the relative path from the project root to the image.
+        // This path can be stored in the database and used to construct image URLs dynamically.
+        return ['success' => true, 'path' => 'src/_assets/' . $fileName];
     } else {
         return ['success' => false, 'error' => 'Failed to upload image.'];
     }
