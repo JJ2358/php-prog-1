@@ -1,33 +1,42 @@
 <?php
-$imageUrl = $product['photo'];
-echo "Image URL: " . $imageUrl;
-var_dump('../_assets/' . htmlspecialchars($product['photo']));
-var_dump($product);
+// $imageUrl = $product['photo'];
+// echo "Image URL: " . $imageUrl;
+// var_dump('../_assets/' . htmlspecialchars($product['photo']));
+// var_dump($product['photo']);
 
-$directoryPath = '../_assets';
-$files = scandir($directoryPath);
+// $directoryPath = '../_assets';
+// $files = scandir($directoryPath);
 
-if ($files !== false) {
-    // Iterate through the array to display file names
-    foreach ($files as $file) {
-        // Skip '.' and '..' entries
-        if ($file !== "." && $file !== "..") {
-            echo $file . "<br>";
-        }
-    }
-} else {
-    echo "Could not read the directory.";
-}
+// if ($files !== false) {
+//     // Iterate through the array to display file names
+//     foreach ($files as $file) {
+//         // Skip '.' and '..' entries
+//         if ($file !== "." && $file !== "..") {
+//             echo $file . "<br>";
+//         }
+//     }
+// } else {
+//     echo "Could not read the directory.";
+// }
 
 if (!empty($product['photo'])) {
-    // Assuming the script is executed in a path where '../_assets/' correctly points to the _assets folder
-    $imageUrl = '../_assets/' . htmlspecialchars($product['photo']);
+    // Adjust the path according to the actual location of the _assets directory
+    $imageUrl = 'src/_assets/' . htmlspecialchars($product['photo']);
     echo "<img src='$imageUrl' alt='Product Image'>";
 } else {
     echo "No image available.";
 }
+Var_dump($imageUrl);
+echo "<pre>";
+var_dump($productID);
+var_dump($product);
+echo "</pre>";
+
+var_dump(htmlspecialchars($product['photo']));
+
 
 ?>
+
 
 <!doctype html>
 <html lang="en">
@@ -49,11 +58,8 @@ if (!empty($product['photo'])) {
     <div class="max-w-4xl mx-auto bg-white p-5 rounded shadow">
         <h1 class="text-2xl font-bold"><?= htmlspecialchars($product['title']); ?></h1>
 
-        <?php if (!empty($product['photo'])): ?>
-            <img src="../_assets/<?= htmlspecialchars($product['photo']); ?>" alt="Product Image" style="max-width: 100%; height: auto;">
-        <?php else: ?>
-            <p>No image available.</p>
-        <?php endif; ?>
+        <img src="<?=htmlspecialchars($product['photo']); ?>" alt="Product Image">
+
 
         <p><?= nl2br(htmlspecialchars($product['description'])); ?></p>
         <p class="mt-2"><strong>Price:</strong> $<?= htmlspecialchars($product['price']); ?></p>
@@ -104,7 +110,7 @@ if (!empty($product['photo'])) {
                     <option value="3">3 Stars</option>
                     <option value="4">4 Stars</option>
                     <option value="5">5 Stars</option>
-                </select>
+                </select>src/_assets
             </div>
             <!-- First Name Input -->
             <div class="mb-4">

@@ -182,7 +182,10 @@ function updateReview(int $reviewID, int $rating, string $firstName, string $las
 
 
 function uploadImageAndStorePath($imageFile) {
-    $targetDir = dirname(__DIR__) . '/src/_assets/'; // Updated path
+    $targetDir = dirname(__DIR__) . '/_assets/';
+    if (!file_exists($targetDir)) {
+        mkdir($targetDir, 0755, true); // This will create the directory if it doesn't exist
+    }
     $fileName = uniqid() . '-' . basename($imageFile['name']);
     $targetFilePath = $targetDir . $fileName;
 
@@ -192,3 +195,4 @@ function uploadImageAndStorePath($imageFile) {
         return ['success' => false, 'error' => 'Failed to upload image.'];
     }
 }
+
